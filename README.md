@@ -1,6 +1,7 @@
 # ECG Records
 
 A very simple Angular 19 App built without Observables using signals and [TansStack query](https://tanstack.com/query/latest/docs/framework/angular/overview).
+
 This app also uses :
 
 - DOM unit testing: [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro)
