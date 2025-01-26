@@ -40,7 +40,7 @@ export class EcgsComponent {
   labelById = computed<Record<string, Label>>(() =>
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
-  isFirstLoading = computed(() => this.#ecgsQuery.isLoading() || this.#labelsQuery.isLoading());
+  isLoading = computed(() => this.#ecgsQuery.isLoading() || this.#labelsQuery.isLoading());
 
   updateLabelOnEcg(ecgId: string, labelId: string) {
     // optimistic update with linked signals

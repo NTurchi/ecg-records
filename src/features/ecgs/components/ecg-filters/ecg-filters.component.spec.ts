@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { EcgFiltersComponent } from './ecg-filters.component';
 import { fireEvent, getByPlaceholderText, getByRole } from '@testing-library/dom';
 
+import { EcgFiltersComponent } from './ecg-filters.component';
 import { getLabelMockList } from '../../../../mocks/label.mock';
 
 describe('EcgFiltersComponent', () => {
