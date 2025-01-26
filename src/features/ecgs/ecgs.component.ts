@@ -52,7 +52,7 @@ export class EcgsComponent {
         return ecg;
       })
     );
-    this.#ecgService.updateLabelOnEcg.mutateAsync({ ecgId, labelId });
+    this.#ecgService.updateEcg.mutateAsync({ ecgId, ecg: { labelId } });
   }
 
   onFiltersChange = debounce(

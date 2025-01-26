@@ -7,6 +7,12 @@ This app also uses :
 - DOM unit testing: [DOM Testing Library](https://testing-library.com/docs/dom-testing-library/intro)
 - UI: [TailwindCSS v3](https://v3.tailwindcss.com/) & [DaisyUI](https://daisyui.com/)
 - Icons: [Lucide Angular](https://lucide.dev/)
+
+Other branches:
+
+- [feat/with-resource](https://github.com/NTurchi/ecg-records/tree/feat/with-resource): Replace TansStack Query by [Angular resource and fetch](https://angular.dev/guide/signals/resource)
+- [feat/with-signal-store](https://github.com/NTurchi/ecg-records/tree/feat/with-signal-store): TansStack Query & [NgRx Signal Store](https://ngrx.io/guide/signals/signal-store)
+
 - State Management: [NgRx Signal Store](https://ngrx.io/guide/signals/signal-store) (only for demo purpose on this branch)
 
 ## Quick Demo
