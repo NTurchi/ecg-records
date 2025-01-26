@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Search, Tag } from 'lucide-angular';
 
-import { EcgSearchFilters, EcgService, Label } from '../../../../core';
+import { EcgService, debounce } from '../../../../core';
 import { LabelBadgeComponent } from '../label-badge/label-badge.component';
+import { EcgsStore } from '../../stores/ecgs.store';
 
 @Component({
   imports: [CommonModule, FormsModule, LucideAngularModule, LabelBadgeComponent],
@@ -13,12 +14,12 @@ import { LabelBadgeComponent } from '../label-badge/label-badge.component';
   templateUrl: './ecg-filters.component.html',
 })
 export class EcgFiltersComponent {
+  #ecgsState = inject(EcgsStore);
+
   SearchIcon = Search;
   TagIcon = Tag;
 
-  styleClass = input('');
-  labels = input.required<Label[]>();
-  filtersChange = output<EcgSearchFilters>();
+  labels = this.#ecgsState.labels;
 
   labelsFilter = signal<string[]>([]);
   nameFilter = signal<string>('');
@@ -30,19 +31,19 @@ export class EcgFiltersComponent {
     } else {
       this.labelsFilter.set([...this.labelsFilter(), labelId]);
     }
-    this.emitFiltersChange();
+    this.filtersChange();
   }
 
   filterByPatientName(event: Event) {
     const target = event.target as HTMLInputElement;
     this.nameFilter.set(target.value);
-    this.emitFiltersChange();
+    this.filtersChange();
   }
 
-  emitFiltersChange() {
-    this.filtersChange.emit({
-      labelIds: this.labelsFilter(),
+  filtersChange = debounce(() => {
+    this.#ecgsState.updateFilter({
       patientFullName: this.nameFilter(),
+      labelIds: this.labelsFilter(),
     });
-  }
+  }, 500);
 }

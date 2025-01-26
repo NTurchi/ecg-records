@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+
 import { Ecg, Label } from '../../../../core';
 import { LabelBadgeComponent } from '../label-badge/label-badge.component';
+import { EcgsStore } from '../../stores/ecgs.store';
 
 @Component({
   imports: [CommonModule, LabelBadgeComponent],
@@ -9,9 +11,14 @@ import { LabelBadgeComponent } from '../label-badge/label-badge.component';
   templateUrl: './ecg-card.component.html',
 })
 export class EcgCardComponent {
-  ecg = input.required<Ecg>();
-  label = input.required<Label>();
-  labels = input.required<Label[]>();
+  #ecgsState = inject(EcgsStore);
 
-  updateLabel = output<Label>();
+  ecg = input.required<Ecg>();
+
+  label = computed(() => this.#ecgsState.labelById()[this.ecg().labelId]);
+  labels = this.#ecgsState.labels;
+
+  updateLabel(label: Label) {
+    this.#ecgsState.updateLabelOnEcg(this.ecg().id, label.id);
+  }
 }

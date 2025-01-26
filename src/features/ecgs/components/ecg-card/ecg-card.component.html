@@ -27,7 +27,7 @@
             class="radio"
             [name]="'label-' + ecg().id"
             [checked]="ecg().labelId === label.id"
-            (change)="updateLabel.emit(label)" />
+            (change)="updateLabel(label)" />
         </label>
       </div>
     }
