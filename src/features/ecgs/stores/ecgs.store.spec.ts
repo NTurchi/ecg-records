@@ -96,7 +96,7 @@ describe('EcgsStore', () => {
   });
 
   describe('isLoading', () => {
-    it('should be false if ecgs and labels are not loading', () => {
+    it('should return false if ecgs and labels are not loading', () => {
       const ecgsStore = TestBed.inject(EcgsStore);
 
       spyOn(ecgsQuery, 'isLoading').and.returnValue(false);
