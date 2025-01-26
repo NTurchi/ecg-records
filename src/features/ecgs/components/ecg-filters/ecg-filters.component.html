@@ -1,0 +1,39 @@
+<div class="flex flex-col md:flex-row gap-4">
+  <div class="relative flex-1">
+    <div class="absolute inset-y-0 flex items-center pointer-events-none left-3">
+      <lucide-icon [img]="SearchIcon" class="w-5 h-5 text-gray-400"></lucide-icon>
+    </div>
+    <input
+      type="text"
+      placeholder="Search ECGs..."
+      class="w-full pl-10 input input-bordered"
+      (keyup)="filterByPatientName($event)" />
+  </div>
+
+  <div class="flex-1">
+    <details class="w-full dropdown dropdown-end">
+      <summary class="w-full btn btn-outline" role="button">
+        <lucide-icon [img]="TagIcon" class="w-5 h-5 mr-2"></lucide-icon>
+        <span id="ecg-filters-label">Filter by Labels</span>
+      </summary>
+      <ul
+        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-2"
+        aria-labelledby="ecg-filters-label"
+        aria-multiselectable="true">
+        @for (label of labels(); track label) {
+          <div class="form-control">
+            <label class="cursor-pointer label">
+              <app-label-badge [label]="label"></app-label-badge>
+              <input
+                type="checkbox"
+                class="checkbox"
+                [checked]="labelsFilter().includes(label.id)"
+                [attr.aria-label]="label.name"
+                (change)="filterByLabel(label.id)" />
+            </label>
+          </div>
+        }
+      </ul>
+    </details>
+  </div>
+</div>
