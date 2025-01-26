@@ -1,18 +1,14 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable, Signal } from '@angular/core';
-import { injectQuery } from '@tanstack/angular-query-experimental';
-import { lastValueFrom } from 'rxjs';
+import { Injectable, resource } from '@angular/core';
 
 import { Label } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class LabelService {
-  #httpClient = inject(HttpClient);
-
   getLabels() {
-    return injectQuery(() => ({
-      queryKey: ['labels'],
-      queryFn: () => lastValueFrom(this.#httpClient.get<Label[]>('/api/labels')),
-    }));
+    return resource({
+      loader: async (): Promise<Label[]> => {
+        return fetch('/api/labels').then(response => response.json() as Promise<Label[]>);
+      },
+    });
   }
 }

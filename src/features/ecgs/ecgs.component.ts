@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Activity, LucideAngularModule } from 'lucide-angular';
 
@@ -30,29 +30,29 @@ export class EcgsComponent {
     patientFullName: undefined,
   });
 
-  #ecgsQuery = this.#ecgService.getEcgs(this.ecgSearchFilters);
+  #ecgRessource = this.#ecgService.getEcgs(this.ecgSearchFilters);
   #labelsQuery = this.#labelService.getLabels();
 
   ActivityIcon = Activity;
 
-  ecgs = linkedSignal(() => this.#ecgsQuery.data() || []);
-  labels = computed(() => this.#labelsQuery.data() || []);
+  ecgs = computed(() => this.#ecgRessource.value() || []);
+  labels = computed(() => this.#labelsQuery.value() || []);
   labelById = computed<Record<string, Label>>(() =>
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
-  isFirstLoading = computed(() => this.#ecgsQuery.isLoading() || this.#labelsQuery.isLoading());
+  isLoading = computed(() => this.#ecgRessource.isLoading() || this.#labelsQuery.isLoading());
 
   updateLabelOnEcg(ecgId: string, labelId: string) {
     // optimistic update with linked signals
-    this.ecgs.set(
-      this.ecgs().map(ecg => {
+    this.#ecgRessource.update((ecgs = []) => {
+      return ecgs.map(ecg => {
         if (ecg.id === ecgId) {
           return { ...ecg, labelId };
         }
         return ecg;
-      })
-    );
-    this.#ecgService.updateLabelOnEcg.mutateAsync({ ecgId, labelId });
+      });
+    });
+    this.#ecgService.updateEcg(ecgId, { labelId });
   }
 
   onFiltersChange = debounce(

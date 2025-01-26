@@ -1,54 +1,42 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable, Signal } from '@angular/core';
-import {
-  injectMutation,
-  injectQuery,
-  injectQueryClient,
-} from '@tanstack/angular-query-experimental';
-import { lastValueFrom } from 'rxjs';
+import { Injectable, resource, Signal } from '@angular/core';
 
 import { Ecg, EcgSearchFilters } from './../models/ecg.model';
 
 @Injectable({ providedIn: 'root' })
 export class EcgService {
-  #httpClient = inject(HttpClient);
-  #queryClient = injectQueryClient();
-
-  #fromSearchFiltersToHttpParams(searchFilters: EcgSearchFilters): HttpParams {
-    const params: Record<string, string | string[]> = {};
+  #buildEcgsUrl(searchFilters: EcgSearchFilters): URL {
+    const url = new URL(`/api/ecgs`, window.location.origin);
 
     if (searchFilters.patientFullName) {
-      params['patient_full_name'] = searchFilters.patientFullName;
+      url.searchParams.append('patient_full_name', searchFilters.patientFullName);
     }
 
     if (searchFilters.labelIds?.length) {
-      params['label_ids'] = searchFilters.labelIds;
+      url.searchParams.append('label_ids', searchFilters.labelIds.join(','));
     }
 
-    return new HttpParams({ fromObject: params });
+    return url;
   }
 
-  getEcgs(searchFilters?: Signal<EcgSearchFilters>) {
-    return injectQuery(() => ({
-      queryKey: ['ecgs', searchFilters?.()],
-      staleTime: 0,
-      queryFn: () =>
-        lastValueFrom(
-          this.#httpClient.get<Ecg[]>('/api/ecgs', {
-            params: searchFilters && this.#fromSearchFiltersToHttpParams(searchFilters()),
-          })
-        ),
-    }));
+  getEcgs(searchFilters: Signal<EcgSearchFilters>) {
+    return resource({
+      request: () => ({ queryParams: searchFilters() }),
+      loader: async ({ request, abortSignal }): Promise<Ecg[]> => {
+        const url = this.#buildEcgsUrl(request.queryParams);
+        return fetch(url, { signal: abortSignal }).then(
+          response => response.json() as Promise<Ecg[]>
+        );
+      },
+    });
   }
 
-  updateLabelOnEcg = injectMutation(() => ({
-    retry: false,
-    mutationFn: (args: { ecgId: string; labelId: string }) =>
-      lastValueFrom(
-        this.#httpClient.patch<Ecg>(`/api/ecgs/${args.ecgId}`, {
-          label_id: args.labelId,
-        })
-      ),
-    onSuccess: () => this.#queryClient.invalidateQueries({ queryKey: ['ecgs'] }),
-  }));
+  updateEcg(ecgId: string, ecg: Partial<Ecg>) {
+    const request = new Request(`/api/ecgs/${ecgId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        label_id: ecg.labelId,
+      }),
+    });
+    fetch(request);
+  }
 }
