@@ -41,12 +41,12 @@ export class EcgService {
     }));
   }
 
-  updateLabelOnEcg = injectMutation(() => ({
+  updateEcg = injectMutation(() => ({
     retry: false,
-    mutationFn: (args: { ecgId: string; labelId: string }) =>
+    mutationFn: (args: { ecgId: string; ecg: Partial<Ecg> }) =>
       lastValueFrom(
         this.#httpClient.patch<Ecg>(`/api/ecgs/${args.ecgId}`, {
-          label_id: args.labelId,
+          label_id: args.ecg.labelId,
         })
       ),
     onSuccess: () => this.#queryClient.invalidateQueries({ queryKey: ['ecgs'] }),
