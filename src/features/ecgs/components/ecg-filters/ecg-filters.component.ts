@@ -16,12 +16,11 @@ export class EcgFiltersComponent {
   SearchIcon = Search;
   TagIcon = Tag;
 
-  styleClass = input('');
   labels = input.required<Label[]>();
   filtersChange = output<EcgSearchFilters>();
 
   labelsFilter = signal<string[]>([]);
-  nameFilter = signal<string>('');
+  patientFullNameFilter = signal<string>('');
 
   filterByLabel(labelId: string) {
     const isToggled = this.labelsFilter().includes(labelId);
@@ -35,14 +34,14 @@ export class EcgFiltersComponent {
 
   filterByPatientName(event: Event) {
     const target = event.target as HTMLInputElement;
-    this.nameFilter.set(target.value);
+    this.patientFullNameFilter.set(target.value);
     this.emitFiltersChange();
   }
 
   emitFiltersChange() {
     this.filtersChange.emit({
       labelIds: this.labelsFilter(),
-      patientFullName: this.nameFilter(),
+      patientFullName: this.patientFullNameFilter(),
     });
   }
 }

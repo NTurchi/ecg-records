@@ -17,13 +17,16 @@ const initEcgDb = () => {
 const ecgDb = initEcgDb();
 
 export const handlers = [
+  // ECGS
   http.get('/api/ecgs', async ({ request }) => {
     await delay(500);
 
     const url = new URL(request.url);
     const patientFullName = url.searchParams.get('patient_full_name');
     const labelIds = url.searchParams.getAll('label_ids');
+
     let ecgs = ecgDb();
+
     if (patientFullName) {
       ecgs = ecgs.filter(ecg => ecg.patientFullName.includes(patientFullName));
     }
@@ -46,5 +49,7 @@ export const handlers = [
 
     return HttpResponse.json(ecgDb().find(ecg => ecg.id === ecgId));
   }),
+
+  // LABELS
   http.get('/api/labels', () => HttpResponse.json(getLabelMockList())),
 ];
