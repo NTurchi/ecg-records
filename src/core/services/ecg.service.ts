@@ -37,6 +37,6 @@ export class EcgService {
         label_id: ecg.labelId,
       }),
     });
-    fetch(request);
+    return fetch(request);
   }
 }
