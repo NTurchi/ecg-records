@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable, signal, Signal } from '@angular/core';
+import { inject, Injectable, Signal } from '@angular/core';
 import {
   injectMutation,
   injectQuery,
@@ -15,7 +15,9 @@ export class EcgService {
   #queryClient = injectQueryClient();
   #currentSearchQuery?: EcgSearchFilters;
 
-  #fromSearchFiltersToHttpParams(searchFilters: EcgSearchFilters): HttpParams {
+  #fromSearchFiltersToHttpParams(searchFilters?: EcgSearchFilters): HttpParams | undefined {
+    if (!searchFilters) return undefined;
+
     const params: Record<string, string | string[]> = {};
 
     if (searchFilters.patientFullName) {
@@ -32,12 +34,11 @@ export class EcgService {
   getEcgs(searchFilters?: Signal<EcgSearchFilters>) {
     return injectQuery(() => ({
       queryKey: ['ecgs', searchFilters?.()],
-      staleTime: 0,
       queryFn: () => {
         this.#currentSearchQuery = searchFilters?.();
         return lastValueFrom(
           this.#httpClient.get<Ecg[]>('/api/ecgs', {
-            params: searchFilters && this.#fromSearchFiltersToHttpParams(searchFilters()),
+            params: this.#fromSearchFiltersToHttpParams(searchFilters?.()),
           })
         );
       },

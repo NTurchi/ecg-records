@@ -71,7 +71,6 @@ describe('EcgsComponent', () => {
   it('should trigger an optimistic update and a mutation when updating the label of an ecg', () => {
     ecgs.set(getEcgListMock(3));
     spyOn(updateEcgMutationQuery, 'mutate');
-    spyOn(fixture.componentInstance.ecgs, 'set');
 
     fixture.componentInstance.updateLabelOnEcg(ecgs()[0].id, 'labelId');
 
@@ -100,13 +99,9 @@ describe('EcgsComponent', () => {
 
   it('should display an error message when the update fails', () => {
     spyOn(updateEcgMutationQuery, 'isError').and.returnValue(true);
-    const spy = spyOn(updateEcgMutationQuery, 'mutate');
 
     // trigger the error on update
     fixture.componentInstance.updateLabelOnEcg('id', 'labelId');
-    spy.calls
-      .first()
-      .args[1]?.onError?.(new HttpErrorResponse({ status: 500 }), { ecgId: 'id', ecg: {} });
     fixture.detectChanges();
 
     const errorMessage = getByRole(fixture.nativeElement, 'alert');

@@ -35,13 +35,18 @@ export class EcgsComponent {
 
   ActivityIcon = Activity;
 
-  ecgs = linkedSignal(() => this.#ecgsQuery.data() || []);
+  ecgs = computed(() => this.#ecgsQuery.data() || []);
   labels = computed(() => this.#labelsQuery.data() || []);
   labelById = computed<Record<string, Label>>(() =>
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
   isLoading = computed(() => this.#ecgsQuery.isLoading() || this.#labelsQuery.isLoading());
-  hasError = signal(false);
+  hasError = linkedSignal(
+    () =>
+      this.#ecgsQuery.isError() ||
+      this.#labelsQuery.isError() ||
+      this.#ecgService.updateEcg.isError()
+  );
 
   errorEffect = effect(async () => {
     if (this.hasError()) {
@@ -51,10 +56,7 @@ export class EcgsComponent {
   });
 
   updateLabelOnEcg(ecgId: string, labelId: string) {
-    this.#ecgService.updateEcg.mutate(
-      { ecgId, ecg: { labelId } },
-      { onError: () => this.hasError.set(true) }
-    );
+    this.#ecgService.updateEcg.mutate({ ecgId, ecg: { labelId } });
   }
 
   onFiltersChange = debounce(
