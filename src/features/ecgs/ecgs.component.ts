@@ -30,17 +30,17 @@ export class EcgsComponent {
     patientFullName: undefined,
   });
 
-  #ecgRessource = this.#ecgService.getEcgs(this.ecgSearchFilters);
-  #labelsQuery = this.#labelService.getLabels();
+  #ecgResource = this.#ecgService.getEcgs(this.ecgSearchFilters);
+  #labelsResource = this.#labelService.getLabels();
 
   ActivityIcon = Activity;
 
-  ecgs = linkedSignal(() => this.#ecgRessource.value() || []);
-  labels = computed(() => this.#labelsQuery.value() || []);
+  ecgs = linkedSignal(() => this.#ecgResource.value() || []);
+  labels = computed(() => this.#labelsResource.value() || []);
   labelById = computed<Record<string, Label>>(() =>
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
-  isLoading = computed(() => this.#ecgRessource.isLoading() || this.#labelsQuery.isLoading());
+  isLoading = computed(() => this.#ecgResource.isLoading() || this.#labelsResource.isLoading());
   hasError = signal(false);
 
   errorEffect = effect(async () => {
