@@ -35,13 +35,13 @@ export class EcgsComponent {
 
   ActivityIcon = Activity;
 
-  ecgs = linkedSignal(() => this.#ecgResource.value() || []);
+  ecgs = computed(() => this.#ecgResource.value() || []);
   labels = computed(() => this.#labelsResource.value() || []);
   labelById = computed<Record<string, Label>>(() =>
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
   isLoading = computed(() => this.#ecgResource.isLoading() || this.#labelsResource.isLoading());
-  hasError = signal(false);
+  hasError = linkedSignal(() => this.#ecgResource.error() || this.#labelsResource.error());
 
   errorEffect = effect(async () => {
     if (this.hasError()) {
@@ -51,10 +51,10 @@ export class EcgsComponent {
   });
 
   async updateLabelOnEcg(ecgId: string, labelId: string) {
-    // optimistic update with linked signals
+    // optimistic update with resource.update
     const previousList = this.ecgs();
-    this.ecgs.set(
-      previousList.map(ecg => {
+    this.#ecgResource.update((ecgs = []) =>
+      ecgs.map(ecg => {
         if (ecg.id === ecgId) {
           return { ...ecg, labelId };
         }
@@ -66,7 +66,7 @@ export class EcgsComponent {
       await this.#ecgService.updateEcg(ecgId, { labelId });
     } catch (e) {
       this.hasError.set(true);
-      this.ecgs.set(previousList);
+      this.#ecgResource.update(() => previousList);
     }
   }
 
