@@ -12,6 +12,7 @@ import {
   getSuccessQueryMock,
 } from '../../core';
 import { getEcgListMock } from '../../mocks/ecg.mock';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('EcgsComponent', () => {
   let fixture: ComponentFixture<EcgsComponent>;
@@ -69,23 +70,18 @@ describe('EcgsComponent', () => {
 
   it('should trigger an optimistic update and a mutation when updating the label of an ecg', () => {
     ecgs.set(getEcgListMock(3));
-    spyOn(updateEcgMutationQuery, 'mutateAsync');
+    spyOn(updateEcgMutationQuery, 'mutate');
     spyOn(fixture.componentInstance.ecgs, 'set');
 
     fixture.componentInstance.updateLabelOnEcg(ecgs()[0].id, 'labelId');
 
-    // optimistic update before the mutation
-    expect(fixture.componentInstance.ecgs.set).toHaveBeenCalledBefore(
-      updateEcgMutationQuery.mutateAsync
+    expect(updateEcgMutationQuery.mutate).toHaveBeenCalledWith(
+      {
+        ecgId: ecgs()[0].id,
+        ecg: { labelId: 'labelId' },
+      },
+      { onError: jasmine.any(Function) }
     );
-    expect(fixture.componentInstance.ecgs.set).toHaveBeenCalledWith([
-      { ...ecgs()[0], labelId: 'labelId' },
-      ...ecgs().slice(1, 3),
-    ]);
-    expect(updateEcgMutationQuery.mutateAsync).toHaveBeenCalledWith({
-      ecgId: ecgs()[0].id,
-      ecg: { labelId: 'labelId' },
-    });
   });
 
   it('should update the search filters with a debounce when the filters change', fakeAsync(() => {
@@ -101,4 +97,19 @@ describe('EcgsComponent', () => {
       patientFullName: 'John Doe',
     });
   }));
+
+  it('should display an error message when the update fails', () => {
+    spyOn(updateEcgMutationQuery, 'isError').and.returnValue(true);
+    const spy = spyOn(updateEcgMutationQuery, 'mutate');
+
+    // trigger the error on update
+    fixture.componentInstance.updateLabelOnEcg('id', 'labelId');
+    spy.calls
+      .first()
+      .args[1]?.onError?.(new HttpErrorResponse({ status: 500 }), { ecgId: 'id', ecg: {} });
+    fixture.detectChanges();
+
+    const errorMessage = getByRole(fixture.nativeElement, 'alert');
+    expect(errorMessage.textContent).toContain('An error occurred');
+  });
 });

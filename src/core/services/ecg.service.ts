@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable, Signal } from '@angular/core';
+import { inject, Injectable, signal, Signal } from '@angular/core';
 import {
   injectMutation,
   injectQuery,
@@ -13,6 +13,7 @@ import { Ecg, EcgSearchFilters } from './../models/ecg.model';
 export class EcgService {
   #httpClient = inject(HttpClient);
   #queryClient = injectQueryClient();
+  #currentSearchQuery?: EcgSearchFilters;
 
   #fromSearchFiltersToHttpParams(searchFilters: EcgSearchFilters): HttpParams {
     const params: Record<string, string | string[]> = {};
@@ -32,12 +33,14 @@ export class EcgService {
     return injectQuery(() => ({
       queryKey: ['ecgs', searchFilters?.()],
       staleTime: 0,
-      queryFn: () =>
-        lastValueFrom(
+      queryFn: () => {
+        this.#currentSearchQuery = searchFilters?.();
+        return lastValueFrom(
           this.#httpClient.get<Ecg[]>('/api/ecgs', {
             params: searchFilters && this.#fromSearchFiltersToHttpParams(searchFilters()),
           })
-        ),
+        );
+      },
     }));
   }
 
@@ -49,6 +52,17 @@ export class EcgService {
           label_id: args.ecg.labelId,
         })
       ),
-    onSuccess: () => this.#queryClient.invalidateQueries({ queryKey: ['ecgs'] }),
+    onMutate: args => {
+      // optimistic update
+      this.#queryClient.setQueryData<Ecg[]>(['ecgs', this.#currentSearchQuery], (ecgs = []) =>
+        ecgs.map(ecg => {
+          if (ecg.id === args.ecgId) {
+            return { ...ecg, ...args.ecg };
+          }
+          return ecg;
+        })
+      );
+    },
+    onSettled: () => this.#queryClient.invalidateQueries({ queryKey: ['ecgs'] }),
   }));
 }

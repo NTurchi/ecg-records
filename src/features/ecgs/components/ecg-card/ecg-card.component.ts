@@ -11,7 +11,7 @@ import { LabelBadgeComponent } from '../label-badge/label-badge.component';
 export class EcgCardComponent {
   ecg = input.required<Ecg>();
   label = input.required<Label>();
-  labels = input.required<Label[]>();
+  labels = input<Label[]>();
 
   updateLabel = output<Label>();
 }

@@ -14,7 +14,22 @@ const initEcgDb = () => {
   };
 };
 
+// generate error response every n request
+const errorDb = (requestBeforeError: number) => {
+  let requestCount = 0;
+
+  return () => {
+    requestCount++;
+    if (requestCount === requestBeforeError) {
+      requestCount = 0;
+      return true;
+    }
+    return false;
+  };
+};
+
 const ecgDb = initEcgDb();
+const error = errorDb(4); // error every 4 requests
 
 export const handlers = [
   // ECGS
@@ -40,6 +55,11 @@ export const handlers = [
     const ecgId = params['id'];
     const body = (await request.json()) as { label_id: string };
     const label_id = body.label_id;
+
+    const shouldReturnError = error();
+    if (shouldReturnError) {
+      return HttpResponse.error();
+    }
 
     ecgDb().forEach(ecg => {
       if (ecg.id === ecgId) {

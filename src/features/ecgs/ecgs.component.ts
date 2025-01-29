@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Activity, LucideAngularModule } from 'lucide-angular';
 
-import { debounce, EcgSearchFilters, EcgService, Label, LabelService } from '../../core';
+import { debounce, delay, EcgSearchFilters, EcgService, Label, LabelService } from '../../core';
 import { EcgCardComponent } from './components/ecg-card/ecg-card.component';
 import { EcgFiltersComponent } from './components/ecg-filters/ecg-filters.component';
 import { EcgCardSkeletonComponent } from './components/ecg-card-skeleton/ecg-card-skeleton.component';
@@ -41,18 +41,20 @@ export class EcgsComponent {
     this.labels().reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
   );
   isLoading = computed(() => this.#ecgsQuery.isLoading() || this.#labelsQuery.isLoading());
+  hasError = signal(false);
+
+  errorEffect = effect(async () => {
+    if (this.hasError()) {
+      await delay(3000);
+      this.hasError.set(false);
+    }
+  });
 
   updateLabelOnEcg(ecgId: string, labelId: string) {
-    // optimistic update with linked signals
-    this.ecgs.set(
-      this.ecgs().map(ecg => {
-        if (ecg.id === ecgId) {
-          return { ...ecg, labelId };
-        }
-        return ecg;
-      })
+    this.#ecgService.updateEcg.mutate(
+      { ecgId, ecg: { labelId } },
+      { onError: () => this.hasError.set(true) }
     );
-    this.#ecgService.updateEcg.mutateAsync({ ecgId, ecg: { labelId } });
   }
 
   onFiltersChange = debounce(
