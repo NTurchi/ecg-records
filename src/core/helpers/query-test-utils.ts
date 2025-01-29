@@ -14,9 +14,10 @@ export const getSuccessQueryMock = <T>(data: WritableSignal<T>) =>
     isError: signal(false),
   }) as unknown as CreateQueryResult<T, Error>;
 
-export const getMutationQueryMock = <T, K>() =>
+export const getMutationQueryMock = <T, K, O = void>() =>
   ({
     isSuccess: signal(true),
+    isError: signal(false),
     mutate: (args: K) => {},
     mutateAsync: (args: K) => Promise.resolve(),
-  }) as unknown as CreateMutationResult<T, Error, K>;
+  }) as unknown as CreateMutationResult<T, Error, K, O>;

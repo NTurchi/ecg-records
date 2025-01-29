@@ -61,19 +61,14 @@ describe('EcgsStore', () => {
 
       expect(ecgsStore.filter()).toEqual(filters);
     });
+  });
 
-    it('should perform an optimistic update on ecgs and mutate', () => {
-      ecgs.set(getEcgListMock(3));
+  describe('error handling', () => {
+    it('should set the based on query errors', () => {
       const ecgsStore = TestBed.inject(EcgsStore);
-      const spy = spyOn(updateEcgMutationQuery, 'mutate');
+      spyOn(updateEcgMutationQuery, 'isError').and.returnValue(true);
 
-      ecgsStore.updateLabelOnEcg(ecgs()[0].id, 'something new');
-
-      expect(ecgsStore.ecgs()[0].labelId).toBe('something new');
-      expect(spy).toHaveBeenCalledOnceWith({
-        ecgId: ecgs()[0].id,
-        ecg: { labelId: 'something new' },
-      });
+      expect(ecgsStore.error()).toBeTrue();
     });
   });
 

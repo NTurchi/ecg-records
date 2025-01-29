@@ -10,13 +10,11 @@ import { Ecg, EcgSearchFilters, EcgService, Label, LabelService } from '../../..
 import { computed, inject } from '@angular/core';
 
 type EcgsState = {
-  isLoading: boolean;
   filter: EcgSearchFilters;
 };
 
 // _ecg is used for any optimistic updates
 const initialState: EcgsState & { _ecgs: Record<string, Ecg> } = {
-  isLoading: false,
   filter: {},
   _ecgs: {},
 };
@@ -35,13 +33,9 @@ export const EcgsStore = signalStore(
   }),
   withComputed(store => ({
     loading: computed(() => store.getEcgs.isLoading() || store.getLabels.isLoading()),
+    error: computed(() => store.updateEcg.isError()),
     // Merge the data from the server with the optimistic updates
-    ecgs: computed(() =>
-      (store.getEcgs.data() || []).map(ecg => {
-        const optimisticEcgs = store._ecgs();
-        return optimisticEcgs[ecg.id] || ecg;
-      })
-    ),
+    ecgs: computed(() => store.getEcgs.data() || []),
     labels: computed(() => store.getLabels.data() || []),
     labelById: computed<Record<string, Label>>(() =>
       (store.getLabels.data() || []).reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
@@ -52,17 +46,7 @@ export const EcgsStore = signalStore(
       patchState(store, { filter });
     },
     updateLabelOnEcg(ecgId: string, labelId: string) {
-      const ecg = store.ecgs().find(ecg => ecg.id === ecgId);
-      if (ecg) {
-        patchState(store, {
-          _ecgs: {
-            ...store._ecgs(),
-            [ecgId]: { ...ecg, labelId },
-          },
-        });
-
-        store.updateEcg.mutate({ ecgId, ecg: { labelId } });
-      }
+      store.updateEcg.mutate({ ecgId, ecg: { labelId } });
     },
   }))
 );
