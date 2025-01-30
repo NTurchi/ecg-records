@@ -14,12 +14,12 @@ import { EcgsStore } from '../../stores/ecgs.store';
   templateUrl: './ecg-filters.component.html',
 })
 export class EcgFiltersComponent {
-  #ecgsState = inject(EcgsStore);
+  #ecgsStore = inject(EcgsStore);
 
   SearchIcon = Search;
   TagIcon = Tag;
 
-  labels = this.#ecgsState.labels;
+  labels = this.#ecgsStore.labels;
 
   labelsFilter = signal<string[]>([]);
   nameFilter = signal<string>('');
@@ -41,7 +41,7 @@ export class EcgFiltersComponent {
   }
 
   filtersChange = debounce(() => {
-    this.#ecgsState.updateFilter({
+    this.#ecgsStore.updateFilters({
       patientFullName: this.nameFilter(),
       labelIds: this.labelsFilter(),
     });

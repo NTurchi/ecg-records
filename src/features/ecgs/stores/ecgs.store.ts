@@ -6,17 +6,15 @@ import {
   withProps,
   withState,
 } from '@ngrx/signals';
-import { Ecg, EcgSearchFilters, EcgService, Label, LabelService } from '../../../core';
+import { EcgSearchFilters, EcgService, Label, LabelService } from '../../../core';
 import { computed, inject } from '@angular/core';
 
 type EcgsState = {
-  filter: EcgSearchFilters;
+  filters: EcgSearchFilters;
 };
 
-// _ecg is used for any optimistic updates
-const initialState: EcgsState & { _ecgs: Record<string, Ecg> } = {
-  filter: {},
-  _ecgs: {},
+const initialState: EcgsState = {
+  filters: {},
 };
 
 export const EcgsStore = signalStore(
@@ -26,27 +24,28 @@ export const EcgsStore = signalStore(
     const labelService = inject(LabelService);
 
     return {
-      getEcgs: ecgService.getEcgs(store.filter),
-      updateEcg: ecgService.updateEcg,
-      getLabels: labelService.getLabels(),
+      _getEcgs: ecgService.getEcgs(store.filters),
+      _updateEcg: ecgService.updateEcg,
+      _getLabels: labelService.getLabels(),
     };
   }),
   withComputed(store => ({
-    loading: computed(() => store.getEcgs.isLoading() || store.getLabels.isLoading()),
-    error: computed(() => store.updateEcg.isError()),
-    // Merge the data from the server with the optimistic updates
-    ecgs: computed(() => store.getEcgs.data() || []),
-    labels: computed(() => store.getLabels.data() || []),
+    isLoading: computed(() => store._getEcgs.isLoading() || store._getLabels.isLoading()),
+    hasError: computed(
+      () => store._updateEcg.isError() || store._getEcgs.isError() || store._getLabels.isError()
+    ),
+    ecgs: computed(() => store._getEcgs.data() || []),
+    labels: computed(() => store._getLabels.data() || []),
     labelById: computed<Record<string, Label>>(() =>
-      (store.getLabels.data() || []).reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
+      (store._getLabels.data() || []).reduce((acc, label) => ({ ...acc, [label.id]: label }), {})
     ),
   })),
   withMethods(store => ({
-    updateFilter(filter: EcgSearchFilters) {
-      patchState(store, { filter });
+    updateFilters(filters: EcgSearchFilters) {
+      patchState(store, { filters });
     },
     updateLabelOnEcg(ecgId: string, labelId: string) {
-      store.updateEcg.mutate({ ecgId, ecg: { labelId } });
+      store._updateEcg.mutate({ ecgId, ecg: { labelId } });
     },
   }))
 );

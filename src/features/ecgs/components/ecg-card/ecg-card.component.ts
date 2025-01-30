@@ -11,14 +11,14 @@ import { EcgsStore } from '../../stores/ecgs.store';
   templateUrl: './ecg-card.component.html',
 })
 export class EcgCardComponent {
-  #ecgsState = inject(EcgsStore);
+  #ecgsStore = inject(EcgsStore);
 
   ecg = input.required<Ecg>();
 
-  label = computed(() => this.#ecgsState.labelById()[this.ecg().labelId]);
-  labels = this.#ecgsState.labels;
+  label = computed(() => this.#ecgsStore.labelById()[this.ecg().labelId]);
+  labels = this.#ecgsStore.labels;
 
   updateLabel(label: Label) {
-    this.#ecgsState.updateLabelOnEcg(this.ecg().id, label.id);
+    this.#ecgsStore.updateLabelOnEcg(this.ecg().id, label.id);
   }
 }

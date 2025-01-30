@@ -14,7 +14,7 @@ describe('EcgFiltersComponent', () => {
   const labels = signal<Label[]>([]);
   const ecgStoreMock = {
     labels,
-    updateFilter: (..._args: any[]) => {},
+    updateFilters: (..._args: any[]) => {},
   };
 
   beforeEach(async () => {
@@ -54,7 +54,7 @@ describe('EcgFiltersComponent', () => {
   it('should triggers a filter event when a label is selected', fakeAsync(() => {
     labels.set(getLabelMockList());
     const labelToSelect = labels()[0];
-    const spy = spyOn(ecgStoreMock, 'updateFilter');
+    const spy = spyOn(ecgStoreMock, 'updateFilters');
 
     fixture.detectChanges();
     const labelCheckbox = getByRole<HTMLInputElement>(fixture.nativeElement, 'checkbox', {
@@ -70,7 +70,7 @@ describe('EcgFiltersComponent', () => {
   }));
 
   it('should triggers a search event when the search input changes', fakeAsync(() => {
-    const spy = spyOn(ecgStoreMock, 'updateFilter');
+    const spy = spyOn(ecgStoreMock, 'updateFilters');
     fixture.detectChanges();
 
     const searchInput = getByPlaceholderText<HTMLInputElement>(

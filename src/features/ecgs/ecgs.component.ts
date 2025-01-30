@@ -23,15 +23,15 @@ import { delay } from '../../core';
   templateUrl: './ecgs.component.html',
 })
 export class EcgsComponent {
-  #ecgsState = inject(EcgsStore);
+  #ecgsStore = inject(EcgsStore);
 
   ActivityIcon = Activity;
 
-  ecgs = this.#ecgsState.ecgs;
-  labels = this.#ecgsState.labels;
-  labelById = this.#ecgsState.labelById;
-  isLoading = this.#ecgsState.loading;
-  hasError = linkedSignal(() => this.#ecgsState.error());
+  ecgs = this.#ecgsStore.ecgs;
+  labels = this.#ecgsStore.labels;
+  labelById = this.#ecgsStore.labelById;
+  isLoading = this.#ecgsStore.isLoading;
+  hasError = linkedSignal(() => this.#ecgsStore.hasError());
 
   dismissErrorEffect = effect(async () => {
     if (this.hasError()) {

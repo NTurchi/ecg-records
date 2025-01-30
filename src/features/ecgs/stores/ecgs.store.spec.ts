@@ -57,9 +57,9 @@ describe('EcgsStore', () => {
 
       const filters = { patientFullName: 'John Doe' };
 
-      ecgsStore.updateFilter(filters);
+      ecgsStore.updateFilters(filters);
 
-      expect(ecgsStore.filter()).toEqual(filters);
+      expect(ecgsStore.filters()).toEqual(filters);
     });
   });
 
@@ -68,7 +68,7 @@ describe('EcgsStore', () => {
       const ecgsStore = TestBed.inject(EcgsStore);
       spyOn(updateEcgMutationQuery, 'isError').and.returnValue(true);
 
-      expect(ecgsStore.error()).toBeTrue();
+      expect(ecgsStore.hasError()).toBeTrue();
     });
   });
 
@@ -97,7 +97,7 @@ describe('EcgsStore', () => {
       spyOn(ecgsQuery, 'isLoading').and.returnValue(false);
       spyOn(labelsQuery, 'isLoading').and.returnValue(false);
 
-      expect(ecgsStore.loading()).toBeFalse();
+      expect(ecgsStore.isLoading()).toBeFalse();
     });
 
     it('should return true if ecgs are loading', () => {
@@ -106,7 +106,7 @@ describe('EcgsStore', () => {
       spyOn(ecgsQuery, 'isLoading').and.returnValue(true);
       spyOn(labelsQuery, 'isLoading').and.returnValue(false);
 
-      expect(ecgsStore.loading()).toBeTrue();
+      expect(ecgsStore.isLoading()).toBeTrue();
     });
 
     it('should return true if labels are loading', () => {
@@ -115,7 +115,7 @@ describe('EcgsStore', () => {
       spyOn(ecgsQuery, 'isLoading').and.returnValue(false);
       spyOn(labelsQuery, 'isLoading').and.returnValue(true);
 
-      expect(ecgsStore.loading()).toBeTrue();
+      expect(ecgsStore.isLoading()).toBeTrue();
     });
   });
 });
